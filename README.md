@@ -1,4 +1,4 @@
-# Kibana Autocomplete tags Plugin Widget
+# Kibana Plugin Widget
 Plugin for Kibana.
 
 # Install
