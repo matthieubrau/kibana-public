@@ -65,6 +65,10 @@ define(function (require) {
       });
     };
 
+    queryFilter.getQuery = function (item) {
+      query = Object.keys(item.query.match).map(function(k) { return item.query.match[k] })[0].query
+      return query
+    }
     queryFilter.removeOrFilter = function (matchFilter, key) {
       var filter = _.omit(matchFilter, ['$$hashKey']);
       filter.bool.should.splice(key, 1);

@@ -80,6 +80,11 @@ define(function (require) {
             filter.meta.jsonvalue = result.value;
             filter.meta.field_name = result.key
         }
+        if ( filter.meta.field_name == "city_name" || filter.meta.field_name == "department_code" || filter.meta.field_name == "region_name" || filter.meta.field_name == "natural_region_id"){
+          filter.meta.field_title = "Localisation"
+        }else{
+          filter.meta.field_title = filter.meta.field_name
+        }
         filter.meta.disabled = !!(filter.meta.disabled);
         filter.meta.negate = !!(filter.meta.negate);
         filter.meta.alias = filter.meta.alias || null;

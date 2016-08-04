@@ -33,6 +33,7 @@ define(function (require) {
           'invertAll',
           'removeFilter',
           'removeOrFilter',
+          'getQuery',
           'removeAndFilter',
           'removeNorFilter',
           'removeAll',

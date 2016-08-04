@@ -11,28 +11,27 @@
 
 <div class="bar" ng-show="filters.length">
   <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
-
     <div class="filter-description" ng-if="filter.meta.key == 'bool'">
-      <span>{{ filter.meta.field_name }} : </span>
+      <span>{{ filter.meta.field_title }} : </span>
       <b>( </b><span ng-repeat="(key, item) in filter.meta.jsonvalue.should">
-        <span ng-if="key == 0"> <b>( </b></span><span ng-if="key != 0"> <b>OR </b></span>{{ item.query.match[filter.meta.field_name].query}}</span><b ng-if="filter.meta.jsonvalue.must.length > 0 && filter.meta.jsonvalue.should.length > 0"> ) AND </b>
+        <span ng-if="key == 0"> <b>( </b></span><span ng-if="key != 0"> <b>OR </b></span>{{ getQuery(item) }}</span><b ng-if="filter.meta.jsonvalue.must.length > 0 && filter.meta.jsonvalue.should.length > 0"> ) AND </b>
       <span ng-repeat="(key, item) in filter.meta.jsonvalue.must">
-        <span ng-if="key == 0"> <b>( </b></span><span ng-if="key != 0"> <b>AND</b> </span>{{ item.query.match[filter.meta.field_name].query}}</span><b ng-if="filter.meta.jsonvalue.must_not.length > 0 && ( filter.meta.jsonvalue.must.length > 0 || filter.meta.jsonvalue.should.length > 0 )"> ) AND </b>
+        <span ng-if="key == 0"> <b>( </b></span><span ng-if="key != 0"> <b>AND</b> </span>{{ getQuery(item) }}</span><b ng-if="filter.meta.jsonvalue.must_not.length > 0 && ( filter.meta.jsonvalue.must.length > 0 || filter.meta.jsonvalue.should.length > 0 )"> ) AND </b>
       <span ng-repeat="(key, item) in filter.meta.jsonvalue.must_not">
-        <span ng-if="key == 0"> <b>NOT ( </b></span><span ng-if="key != 0"> <b>OR</b> </span>{{ item.query.match[filter.meta.field_name].query}}</span><b> ) )</b>
+        <span ng-if="key == 0"> <b>NOT ( </b></span><span ng-if="key != 0"> <b>OR</b> </span>{{ getQuery(item) }}</span><b> ) )</b>
     </div>
     <div class="filter-actions" ng-if="filter.meta.key == 'bool'">
-      <span ng-repeat="(key, item) in filter.meta.jsonvalue.should">{{ item.query.match[filter.meta.field_name].query}}
+      <span ng-repeat="(key, item) in filter.meta.jsonvalue.should">{{ getQuery(item) }}
         <a class="action filter-remove" ng-click="removeOrFilter(filter, key)">
           <i class="fa fa-fw fa-trash"></i>
         </a>
       </span>
-      <span ng-repeat="(key, item) in filter.meta.jsonvalue.must">{{ item.query.match[filter.meta.field_name].query}}
+      <span ng-repeat="(key, item) in filter.meta.jsonvalue.must">{{ getQuery(item) }}
         <a class="action filter-remove" ng-click="removeAndFilter(filter, key)">
           <i class="fa fa-fw fa-trash"></i>
         </a>
       </span>
-      <span ng-repeat="(key, item) in filter.meta.jsonvalue.must_not">{{ item.query.match[filter.meta.field_name].query}}
+      <span ng-repeat="(key, item) in filter.meta.jsonvalue.must_not">{{ getQuery(item) }}
         <a class="action filter-remove" ng-click="removeNorFilter(filter, key)">
           <i class="fa fa-fw fa-trash"></i>
         </a>

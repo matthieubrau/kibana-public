@@ -23,27 +23,30 @@ define(function (require) {
       return false
     }
 
-    filterManager.addOrFilter = function (field, values){
+    filterManager.addOrFilter = function (field, values, match_field){
+      if (typeof(match_field) == "undefined"){
+        match_field = field
+      }
       var filters = _.flatten([queryFilter.getAppFilters()]);
       for (i = 0; i<filters.length; i++){
-        if ( filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1){
+        if ( ( field == "localisation" && ( match_field == "department_code" || match_field == "region_name" || match_field == "natural_region_id" || match_field == "city_name") ) || filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1){
           if ( filters[i].query ){
             filters[i].bool = {should: []}
             if ( values != filters[i].meta.value){
               newShould = {"query": {"match": {}}}
-              newShould.query.match[field] = {"query": values,"type": "phrase"}
+              newShould.query.match[match_field] = {"query": values,"type": "phrase"}
               filters[i].bool.should.push(newShould)
               newShould = {"query": {"match": {}}}
-              newShould.query.match[field] = {"query": filters[i].meta.value,"type": "phrase"}
+              newShould.query.match[filters[i].meta.field_name] = {"query": filters[i].meta.value,"type": "phrase"}
               filters[i].bool.should.push(newShould)
               delete filters[i].query
             }
           }else if ( filters[i].bool ){
             newShould = {"query": {"match": {}}}
-            newShould.query.match[field] = {"query": values,"type": "phrase"}
+            newShould.query.match[match_field] = {"query": values,"type": "phrase"}
             exist = false
             for (j = 0; j < filters[i].bool.should.length; j++){
-              if ( filters[i].bool.should[j].query.match[field].query == values){
+              if ( queryFilter.getQuery(filters[i].bool.should[j]) == values){
                 exist = true
                 break;
               }
@@ -52,6 +55,7 @@ define(function (require) {
               filters[i].bool.should.push(newShould)
             }
           }
+          console.log(filters[i])
         }
       }
     }
