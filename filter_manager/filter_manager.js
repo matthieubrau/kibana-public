@@ -3,16 +3,16 @@ define(function (require) {
   return function (Private) {
     var _ = require('lodash');
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterManager = {};
-
+	  var filterManager = {};
+	  
     filterManager.removeOperatorFilter = function(filter){
       queryFilter.removeFilter(filter)
     }
-
+    
     filterManager.getAll = function () {
       return _.flatten([queryFilter.getAppFilters()]);
     }
-
+    
     filterManager.filterAlreadyExist = function(field){
       var filters = _.flatten([queryFilter.getAppFilters()]);
       for (i = 0; i<filters.length; i++){
@@ -22,14 +22,14 @@ define(function (require) {
       }
       return false
     }
-
+    
     filterManager.addOrFilter = function (field, values, match_field){
       if (typeof(match_field) == "undefined"){
         match_field = field
       }
       var filters = _.flatten([queryFilter.getAppFilters()]);
       for (i = 0; i<filters.length; i++){
-        if ( ( field == "localisation" && ( match_field == "department_code" || match_field == "region_name" || match_field == "natural_region_id" || match_field == "city_name") ) || filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1){
+        if ( (( field == "localisation" && ( match_field == "department_code" || match_field == "region_name" || match_field == "natural_region_id" || match_field == "city_name") ) || filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1) && filters[i].meta.negate != true){
           if ( filters[i].query ){
             filters[i].bool = {should: []}
             if ( values != filters[i].meta.value){
@@ -56,19 +56,23 @@ define(function (require) {
             }
           }
           console.log(filters[i])
+	  break ;
         }
       }
     }
 
-    filterManager.addOperatorFilter = function (field, values, operator, first_op){
+    filterManager.addOperatorFilter = function (match_field, values, operator, first_op, field){
+      if (typeof(field) == "undefined"){
+        field = match_field;
+      }
       var filters = _.flatten([queryFilter.getAppFilters()]);
       for (i = 0; i<filters.length; i++){
-        if ( filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1){
+	if ( ( field == "localisation" && ( match_field == "department_code" || match_field == "region_name" || match_field == "natural_region_id" || match_field == "city_name") ) || filters[i].meta.field_name == field || filters[i].meta.value.indexOf(field) > -1){
           if ( filters[i].query ){
             filters[i].bool = {}
             filters[i].bool[first_op] = []
             newItem = {"query": {"match": {}}}
-            newItem.query.match[field] = {"query": filters[i].meta.value,"type": "phrase"}
+            newItem.query.match[filters[i].meta.key] = {"query": filters[i].meta.value,"type": "phrase"}
             filters[i].bool[first_op].push(newItem)
             delete filters[i].query
           }
@@ -76,35 +80,35 @@ define(function (require) {
             filters[i].bool[operator] = []
           }
           newItem = {"query": {"match": {}}}
-          newItem.query.match[field] = {"query": values,"type": "phrase"}
+          newItem.query.match[match_field] = {"query": values,"type": "phrase"}
           filters[i].bool[operator].push(newItem)
         }
       }
     }
-
+    
     filterManager.add = function (field, values, operation, index) {
-      values = _.isArray(values) ? values : [values];
+    values = _.isArray(values) ? values : [values];
       var fieldName = _.isObject(field) ? field.name : field;
       var filters = _.flatten([queryFilter.getAppFilters()]);
       var newFilters = [];
-
+      
       var negate = (operation === '-');
-
+      
       // TODO: On array fields, negating does not negate the combination, rather all terms
       _.each(values, function (value) {
         var filter;
-        var existing = _.find(filters, function (filter) {
+	var existing = _.find(filters, function (filter) {
           if (!filter) return;
-
+	  
           if (fieldName === '_exists_' && filter.exists) {
-            return filter.exists.field === value;
+          return filter.exists.field === value;
           }
-
-          if (filter.query) {
+	
+        if (filter.query) {
             return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
-          }
-
-          if (filter.script) {
+        }
+	
+        if (filter.script) {
             return filter.meta.field === fieldName && filter.script.params.value === value;
           }
         });
